@@ -75,8 +75,6 @@ The project follows a standard verification structure:
 ### 1. Quick Start (EDA Playground)
 You can simulate this design instantly in your browser without installing software.
 
-**[Click here to Run on EDA Playground](INSERT_YOUR_SAVED_PLAYGROUND_LINK_HERE)**
-
 *If running manually:*
 1.  Copy code from `src/` and `test/`.
 2.  Select **Synopsys VCS 2023.03**.
