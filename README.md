@@ -1,7 +1,42 @@
 # 2-Channel DMA Controller
 
 This repository contains the Register Transfer Level (RTL) design and verification environment for a **2-Channel Direct Memory Access (DMA) Controller**.
+## Architecture Diagram
 
+```mermaid
+graph TD
+    subgraph "CPU / Host"
+        CPU["CPU / Testbench"]
+    end
+
+    subgraph "DMA Controller"
+        direction TB
+        SlaveIF["Slave Interface<br/>(Registers)"]
+        
+        subgraph "Channels"
+            CH1["Channel 1<br/>Control Logic"]
+            CH2["Channel 2<br/>Control Logic"]
+        end
+        
+        Arbiter{"Round Robin<br/>Arbiter"}
+        MasterIF["Master Interface<br/>(Read/Write)"]
+    end
+
+    subgraph "System"
+        Memory["RAM / Peripherals"]
+    end
+
+    %% Connections
+    CPU -->|Config & Start| SlaveIF
+    SlaveIF -->|Params| CH1
+    SlaveIF -->|Params| CH2
+    
+    CH1 -->|Req| Arbiter
+    CH2 -->|Req| Arbiter
+    
+    Arbiter -->|Grant| MasterIF
+    MasterIF <-->|Data Bus| Memory
+```
 ## Project Description
 
 A DMA controller is a fundamental hardware component in modern computing systems, designed to enable peripheral devices (such as network interfaces or storage controllers) to transfer data directly to or from the main memory. This capability is critical for maximizing system performance by offloading the data movement tasks from the Central Processing Unit (CPU), allowing the CPU to execute application code concurrently.
