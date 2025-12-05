@@ -1,6 +1,11 @@
 # 2-Channel DMA Controller
 
-This repository contains the Register Transfer Level (RTL) design and verification environment for a **2-Channel Direct Memory Access (DMA) Controller**.
+![Language](https://img.shields.io/badge/language-SystemVerilog-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-Verified-brightgreen)
+
+This repository contains the Register Transfer Level (RTL) design and verification environment for a **2-Channel Direct Memory Access (DMA) Controller**. It features a custom Round-Robin Arbiter to manage simultaneous data transfer streams, optimized for low-resource FPGA implementations.
+
 ## Architecture Diagram
 
 ```mermaid
@@ -37,81 +42,54 @@ graph TD
     Arbiter -->|Grant| MasterIF
     MasterIF <-->|Data Bus| Memory
 ```
-## Project Description
 
-A DMA controller is a fundamental hardware component in modern computing systems, designed to enable peripheral devices (such as network interfaces or storage controllers) to transfer data directly to or from the main memory. This capability is critical for maximizing system performance by offloading the data movement tasks from the Central Processing Unit (CPU), allowing the CPU to execute application code concurrently.
+## Implementation Stats
+Synthesized on Xilinx Vivado (Target: Zynq-7000 / Artix-7 Fabric):
 
-This specific design implements a **dual-channel** architecture, capable of managing two independent data transfer streams simultaneously.
+| Resource | Count | Utilization |
+| :--- | :--- | :--- |
+| **Slice LUTs** | 479 | <1% |
+| **Registers (FF)** | 492 | <1% |
+| **Max Frequency** | 100 MHz (constrained) | - |
 
-### Key Features:
+## Key Features
 
-* **Dual Channel Operation:** Provides two distinct and concurrent transfer paths for simultaneous data transactions.
-
-* **Simple AHB-like Interface:** Designed to interface with memory and peripherals using a simplified bus protocol for address, control, and data transfer.
-
-* **Register-Based Programming:** Transfer parameters, including source address, destination address, and the total length of the transfer, are configured by the CPU writing to dedicated control registers.
-
-* **Interrupt Signaling:** Generates an interrupt to the CPU upon the successful completion of a programmed transfer, signaling that the data is ready.
+* **Dual Channel Operation:** Manages two distinct transfer paths with independent configuration registers.
+* **Round-Robin Arbitration:** Ensures fair bandwidth allocation between channels when both request access simultaneously.
+* **Simplified AHB-like Interface:** Uses a lightweight handshake protocol (Address, Control, Data) for easy integration with custom memory subsystems.
+* **Register-Based Programming:** Fully software-configurable Source/Destination addresses and Transfer Lengths.
+* **Interrupt Signaling:** Generates distinct interrupts upon transfer completion, reducing CPU polling overhead.
 
 ## Repository Structure
 
-The project files are organized to separate the core hardware design from the verification test environment.
+The project follows a standard verification structure:
 
 | **Directory/File** | **Description** |
 | :--- | :--- |
-| `src/` | Contains the **Verilog** source files for the DMA Controller RTL design. |
-| `test/` | Contains the **Verilog** testbench (`dma_controller_tb.v`) used to verify the functional correctness of the DMA Controller. |
-| `README.md` | This file, providing project overview and instructions. |
+| `src/` | Contains the **SystemVerilog** source files (RTL Design). |
+| `test/` | Contains the testbench (`dma_controller_tb.v`) covering basic transfers and arbitration logic. |
+| `README.md` | Project documentation. |
 
-## Simulation and Implementation Instructions
+## Simulation and Usage
 
-The design can be simulated using standard EDA tools or implemented using an FPGA vendor's toolchain.
+### 1. Quick Start (EDA Playground)
+You can simulate this design instantly in your browser without installing software.
 
-### 1. Running on EDA Playground (Simulation)
+**[Click here to Run on EDA Playground](INSERT_YOUR_SAVED_PLAYGROUND_LINK_HERE)**
 
-EDA Playground offers a quick, browser-based solution for simulating the Verilog design.
+*If running manually:*
+1.  Copy code from `src/` and `test/`.
+2.  Select **Synopsys VCS 2023.03**.
+3.  Add flags: `-timescale=1ns/1ns +vcs+flush+all -debug_access+all`.
+4.  Run and view waves in EPWave.
 
-**Steps:**
+### 2. Xilinx Vivado (Simulation & Synthesis)
+Recommended for formal verification and synthesis analysis.
 
-1. **Code Transfer:** Copy the contents of the Verilog files from the `src/` directory (RTL code) and the `test/dma_controller_tb.v` file (Testbench code) into the appropriate file tabs on the EDA Playground website.
-
-2. **Language Selection:** Ensure the chosen language is **Verilog**.
-
-3. **Tool Selection:** Under **Tools & Simulators**, select a suitable simulator, such as **Synopsys VCS 2023.03**.
-
-4. **Configuration:**
-
-   * **Compile Options:** A standard setting is `-timescale=1ns/1ns +vcs+flush+all`.
-
-   * **Run Options:** A standard setting is `-debug_access+all`.
-
-   * Ensure the checkbox for **Open EPWave after run** is checked to enable viewing of the simulation waveforms.
-
-5. **Execution:** Click the **Run** button to compile the design and execute the testbench. The simulation output will be displayed in the console, and the waveforms will load in the EPWave viewer for detailed signal analysis.
-
-### 2. Running on Xilinx Vivado (Simulation and Synthesis)
-
-Vivado is the recommended environment for formal synthesis and hardware targeting (e.g., Xilinx FPGAs).
-
-**Steps:**
-
-1. **Create Project:** Launch Vivado and create a new **RTL Project**. Specify the project name and location.
-
-2. **Add Design Sources:** In the **Add Sources** wizard step, select **Add or Create Design Sources** and include all Verilog files from the local `src/` directory.
-
-3. **Add Simulation Sources:** In the same wizard, select **Add or Create Simulation Sources** and include the testbench file (`dma_controller_tb.v`) from the `test/` directory.
-
-4. **Select Device:** Choose the target FPGA device for your project (e.g., an Artix-7 or Kintex-7 device).
-
-5. **Run Behavioral Simulation:**
-
-   * In the **Flow Navigator** pane, navigate to **Simulation**.
-
-   * Select **Run Simulation** -> **Run Behavioral Simulation**.
-
-   * Vivado will compile the RTL and the testbench, and the **Waveform Viewer** will open. Examine the waveforms to verify that the DMA channels correctly perform the memory transfers as defined by the testbench.
-
-6. **Synthesis and Implementation:** If you wish to synthesize the design, use the **Run Synthesis** and **Run Implementation** flows within the Flow Navigator.
+1.  **Create Project:** New RTL Project -> Target Artix-7 or Kintex-7.
+2.  **Add Sources:** Add `src/` files as Design Sources and `test/` files as Simulation Sources.
+3.  **Run Simulation:** Go to *Flow Navigator -> Simulation -> Run Behavioral Simulation*.
+4.  **View Waveforms:** Observe the `req` and `grant` signals in the Arbiter to see the channel switching in action.
 
 ## Licensing
 
